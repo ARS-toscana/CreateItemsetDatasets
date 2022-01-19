@@ -54,7 +54,7 @@ CreateItemsetDatasets <- function(EAVtables,datevar,dateformat, rename_col,numer
       new_parameter<-c(names(EAVtables)[[t]],unlist(EAVtables[[t]]))
       EAVtables[[t]]<-list(as.list(new_parameter))
     }
-    if(length(unlist(EAVtables[[t]]))==3){
+    else if(length(unlist(EAVtables[[t]]))==3){
       message("Old parameter specification")
     }else{
       stop("The number of elements listed in each last level of the EAVtables parameters must be 2 or 3")
