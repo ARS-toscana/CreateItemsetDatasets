@@ -18,7 +18,7 @@ library(data.table)
 thisdirinput <- paste0(thisdir,"/input/")
 thisdiroutput <- paste0(thisdir,"/output/")
 
-suppressWarnings(if (!file.exists(thosdiroutput)) dir.create(file.path( thisdiroutput)))
+suppressWarnings(if (!file.exists(thisdiroutput)) dir.create(file.path( thisdiroutput)))
 
 # the variables of interest are gestational age from last menstrual period and gestational age from ultrasound
 variables_of_our_study <- c("GESTAGE_FROM_LMP_WEEKS","GESTAGE_FROM_USOUNDS_WEEKS")
@@ -39,13 +39,17 @@ itemsets_of_our_study[["GESTAGE_FROM_USOUNDS_WEEKS"]][["SURVEY_OBSERVATIONS_2"]]
 
 input_EAVtables <- vector(mode = "list")
 
-input_EAVtables[["SURVEY_OBSERVATIONS"]] <- list(
-  list("SURVEY_OBSERVATIONS", "so_source_table", "so_source_column")
-)
+# input_EAVtables[["SURVEY_OBSERVATIONS"]] <- list(
+#   list("SURVEY_OBSERVATIONS", "so_source_table", "so_source_column")
+# )
+# 
+# input_EAVtables[["SURVEY_OBSERVATIONS_2"]] <- list(
+#   list("SURVEY_OBSERVATIONS_2", "so_source_table", "so_source_column")
+#   )
 
-input_EAVtables[["SURVEY_OBSERVATIONS_2"]] <- list(
-  list("SURVEY_OBSERVATIONS_2", "so_source_table", "so_source_column")
-  )
+input_EAVtables[["SURVEY_OBSERVATIONS"]] <- list( "so_source_table", "so_source_column")
+
+input_EAVtables[["SURVEY_OBSERVATIONS_2"]] <- list( "so_source_table", "so_source_column")
 
 
 CreateItemsetDatasets(EAVtables =  input_EAVtables,
