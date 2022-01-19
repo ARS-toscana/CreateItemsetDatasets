@@ -1,5 +1,9 @@
 #'CreateItemsetDatasets
 #'
+#'Version 04 
+#'19/01/2022
+#'Authors: Olga Paoletti, Davide Messina
+#'
 #' The function CreateItemsetDatasets inspects a set of input tables af data and creates a group of datasets, each corresponding to a item set. Each dataset contains the records of the input tables that match the corresponding item set and is named out of it. 
 #'
 #'

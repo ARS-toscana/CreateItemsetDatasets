@@ -39,6 +39,7 @@ itemsets_of_our_study[["GESTAGE_FROM_USOUNDS_WEEKS"]][["SURVEY_OBSERVATIONS_2"]]
 
 input_EAVtables <- vector(mode = "list")
 
+#old specifications
 # input_EAVtables[["SURVEY_OBSERVATIONS"]] <- list(
 #   list("SURVEY_OBSERVATIONS", "so_source_table", "so_source_column")
 # )
@@ -47,8 +48,8 @@ input_EAVtables <- vector(mode = "list")
 #   list("SURVEY_OBSERVATIONS_2", "so_source_table", "so_source_column")
 #   )
 
+#new specifications
 input_EAVtables[["SURVEY_OBSERVATIONS"]] <- list( "so_source_table", "so_source_column")
-
 input_EAVtables[["SURVEY_OBSERVATIONS_2"]] <- list( "so_source_table", "so_source_column")
 
 
