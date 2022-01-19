@@ -47,7 +47,8 @@ CreateItemsetDatasets <- function(EAVtables,datevar,dateformat, rename_col,numer
   suppressWarnings( if (!(file.exists(diroutput))){
     dir.create(file.path( diroutput))
   })
-  #tic()
+  
+  #adapt the EAVtables parameter structure to the old one
   for (t in 1:length(EAVtables)){
     if (length(unlist(EAVtables[[t]]))==2) {
       message("New parameter specification")
