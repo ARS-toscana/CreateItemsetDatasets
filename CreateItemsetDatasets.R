@@ -1,7 +1,7 @@
 #'CreateItemsetDatasets
 #'
-#'Version 04 
-#'19/01/2022
+#'Version 05 
+#'15/02/2022
 #'Authors: Olga Paoletti, Davide Messina
 #'
 #' The function CreateItemsetDatasets inspects a set of input tables af data and creates a group of datasets, each corresponding to a item set. Each dataset contains the records of the input tables that match the corresponding item set and is named out of it. 
@@ -49,6 +49,7 @@ CreateItemsetDatasets <- function(EAVtables,datevar,dateformat, rename_col,numer
     dir.create(file.path( diroutput))
   })
   
+  empty_df<-data.table()
   #adapt the EAVtables parameter structure to the old one
   for (t in 1:length(EAVtables)){
     if (length(unlist(EAVtables[[t]]))==2) {
@@ -152,7 +153,11 @@ CreateItemsetDatasets <- function(EAVtables,datevar,dateformat, rename_col,numer
               }
             }
             
-            empty_df <- used_df[0,]
+            if(ncol(empty_df)==0) {
+              empty_df <- used_df[0,]
+            } else {
+              empty_df<-rbind(used_df[0,], empty_df, fill=T)
+            }
             empty_df<-empty_df[, .SD, .SDcols = !patterns("^Col_|^Filter|^General")]
             
             #keep only the rows that have matched AVpair
