@@ -96,20 +96,13 @@ CreateItemsetDatasets <- function(EAVtables,datevar,dateformat, rename_col,numer
           print(paste0(numericvar[[df2]], " are all numeric"))
       }
       
+      
       if(!missing(rename_col)){
-        for (i in 1:length(rename_col)) {
-          if (i==1) {
-            for (t in  names(rename_col[[i]])) {
-              if (t=="Diagnosis") {
-                person_id = rename_col[[i]][[t]] 
-              } 
-            }
-          } else{
-            for (t in  names(rename_col[[i]])) {
-              if (t=="Diagnosis") {
-                date = rename_col[[i]][[t]] 
-              } 
-            }
+        ###################RENAME THE COLUMNS ID AND DATE
+        for (elem in names(rename_col)) {
+          data <- rename_col[[elem]]
+          if (data[[df2]] %in% names(used_df)) {
+            data.table::setnames(used_df, data[[df2]], elem)
           }
         }
       }
@@ -141,18 +134,7 @@ CreateItemsetDatasets <- function(EAVtables,datevar,dateformat, rename_col,numer
             }
             
             
-            if(!missing(rename_col)){
-              ##################RENAME THE COLUMNS ID AND DATE
-              for (elem in names(rename_col)) {
-                data<-eval(parse(text=elem))
-                for (col in names(used_df)) {
-                  if (col == data[[df2]]) {
-                    setnames(used_df, col, elem )
-                  }
-                }
-              }
-            }
-            
+
             if(ncol(empty_df)==0) {
               empty_df <- used_df[0,]
             } else {
