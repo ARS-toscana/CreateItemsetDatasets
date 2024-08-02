@@ -32,7 +32,7 @@
 #' 
 CreateItemsetDatasets <- function(EAVtables,datevar,dateformat, rename_col,numericvar,
                                   study_variable_names,itemset,
-                                  addtabcol=T, verbose=F,                                                                discard_from_environment=F,
+                                  addtabcol=T, verbose=F,discard_from_environment=F,
                                   dirinput,diroutput,extension) {
   if (!require("haven")) install.packages("haven")
   library(haven)
@@ -48,8 +48,8 @@ CreateItemsetDatasets <- function(EAVtables,datevar,dateformat, rename_col,numer
   library(lubridate)
   
   if (missing(diroutput)) diroutput<-getwd()
-  #Check that output folder exist otherwise create it
   
+  #Check that output folder exist otherwise create it
   suppressWarnings( if (!(file.exists(diroutput))){
     dir.create(file.path( diroutput))
   })
@@ -57,7 +57,7 @@ CreateItemsetDatasets <- function(EAVtables,datevar,dateformat, rename_col,numer
   empty_df<-data.table()
   #adapt the EAVtables parameter structure to the old one
   for (t in 1:length(EAVtables)){
-    if (length(unlist(EAVtables[[t]]))==2) {
+    if (length(unlist(EAVtables[[t]]))<3) {
       message("New parameter specification")
       new_parameter<-c(names(EAVtables)[[t]],unlist(EAVtables[[t]]))
       EAVtables[[t]]<-list(as.list(new_parameter))
@@ -73,6 +73,8 @@ CreateItemsetDatasets <- function(EAVtables,datevar,dateformat, rename_col,numer
     for (df2 in EAVtables[[p]][[1]][[1]]){
       print(paste0("I'm analysing table ",df2))
       if (missing(dirinput)) dirinput<-getwd()
+      
+      #import the input dataset
       if (extension == "dta") {
         used_df <- as.data.table(read_dta(paste0(dirinput,"/",df2,".",extension)))
       } else if (extension == "csv") {
@@ -83,6 +85,7 @@ CreateItemsetDatasets <- function(EAVtables,datevar,dateformat, rename_col,numer
         assign('used_df', get(load(paste0(dirinput,"/",df2,".",extension))))
       }
       
+      #check the date variables format
       if (!missing(dateformat)){
         for (n in 1:length(datevar[[df2]])) {
           if(str_count(dateformat, "m")==3 |str_count(dateformat, "M")==3) {
@@ -95,6 +98,7 @@ CreateItemsetDatasets <- function(EAVtables,datevar,dateformat, rename_col,numer
         }
       }
       
+      #convert the variables specified in the parameter numericvar into numeric 
       if (!missing(numericvar)){
         used_df[,(numericvar[[df2]]):= lapply(.SD, as.numeric), .SDcols = numericvar[[df2]]]
         if (all(sapply(used_df[,get(numericvar[[df2]])], class) == "numeric"))
@@ -103,7 +107,7 @@ CreateItemsetDatasets <- function(EAVtables,datevar,dateformat, rename_col,numer
       
       
       if(!missing(rename_col)){
-        ###################RENAME THE COLUMNS ID AND DATE
+        #RENAME THE COLUMNS ID AND DATE
         for (elem in names(rename_col)) {
           data <- rename_col[[elem]]
           if (data[[df2]] %in% names(used_df)) {
@@ -114,8 +118,7 @@ CreateItemsetDatasets <- function(EAVtables,datevar,dateformat, rename_col,numer
       
       
       used_df[, General:=0]
-      #used_df0<-as.data.table(data.frame(matrix(ncol = 0, nrow = 0)))
-      #for each table search for pair in the specified columns
+      #for each table search for pair in the specified columns and create the filter variable
       if (length(itemset)!=0) {
         for (study_var in study_variable_names) {
           if (df2 %in% names(itemset[[study_var]])) {
@@ -132,6 +135,7 @@ CreateItemsetDatasets <- function(EAVtables,datevar,dateformat, rename_col,numer
               }
             }
             
+            #rename the filter variables
             if ("Filter" %in% colnames(used_df)) {
               used_df[Filter == 1,General:=1]
               Newfilter1 <- paste0("Filter_",study_var)
@@ -139,7 +143,7 @@ CreateItemsetDatasets <- function(EAVtables,datevar,dateformat, rename_col,numer
             }
             
             
-            
+            #create an empty dataset, with the correct column names, in case no rows match the specific filter
             if(ncol(empty_df)==0) {
               empty_df <- used_df[0,]
             } else {
@@ -152,11 +156,8 @@ CreateItemsetDatasets <- function(EAVtables,datevar,dateformat, rename_col,numer
             
             
             if (verbose == F) {
-              #if (nrow(filtered_df) != 0) {
               assign(paste0("FILTERED","_",df2),filtered_df)
-              #}
             }else{
-              #if (nrow(filtered_df) != 0)
               assign(paste0("FILTERED","_",df2),filtered_df,envir = parent.frame())
             }
             
@@ -176,9 +177,8 @@ CreateItemsetDatasets <- function(EAVtables,datevar,dateformat, rename_col,numer
                   setnames(filtered_df,old = "Filter",new = Newfilter2)
                   
                   if (verbose == F) {
-                    #if (nrow(filtered_df2) != 0)
                     assign(paste0(study_var,"_",df2),filtered_df2)
-                  }else{#if (nrow(filtered_df2) != 0)
+                  }else{
                     assign(paste0(study_var,"_",df2),filtered_df2,envir = parent.frame())
                   }
                 }
@@ -191,7 +191,7 @@ CreateItemsetDatasets <- function(EAVtables,datevar,dateformat, rename_col,numer
       ###########append all the datasets related to the same study_var
       for (study_var in study_variable_names) {
         
-        if (TRUE) { #length(itemset)!=0
+        if (TRUE) { 
           export_df <- as.data.table(data.frame(matrix(ncol = 0, nrow = 0)))
           for (p in 1:length(EAVtables)){
             for (df2 in EAVtables[[p]][[1]][[1]]){
@@ -205,17 +205,13 @@ CreateItemsetDatasets <- function(EAVtables,datevar,dateformat, rename_col,numer
               }
             }
           }
+          
+          #save the final output
           if(nrow(export_df)==0) {export_df <- empty_df}
           if (addtabcol == F) {export_df<-export_df[,c("Table_cdm","AVpair"):=NULL]}
           if (discard_from_environment==T) {
-            # if (nrow(export_df)==0) {colnames <- colnames(used_df)
-            # export_df <- setNames(as.data.table(matrix(nrow = 1, ncol = ncol(used_df))), nm = colnames)
-            # }
             assign(study_var, export_df)
           }else{
-            #if (nrow(export_df)==0) {colnames <- colnames(used_df)
-            # export_df <- setNames(as.data.table(matrix(nrow = 1, ncol = ncol(used_df))), nm = colnames)
-            # }
             assign(study_var, export_df, envir = parent.frame())}
           save(study_var, file = paste0(diroutput,"/",study_var,".RData"),list = study_var)
         }else{
